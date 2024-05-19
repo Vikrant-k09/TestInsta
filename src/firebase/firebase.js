@@ -1,7 +1,7 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getAuth, inMemoryPersistence } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import { getAuth, setPersistence, inMemoryPersistence, onAuthStateChanged } from "firebase/auth";
+import { getFirestore, collection, getDocs } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
 // Your web app's Firebase configuration using environment variables for security
@@ -24,12 +24,36 @@ const firestore = getFirestore(app);
 const storage = getStorage(app);
 
 // Set Auth persistence to in-memory for better control in certain environments
-auth.setPersistence(inMemoryPersistence)
+setPersistence(auth, inMemoryPersistence)
   .then(() => {
-    // In-memory persistence set successfully
+    console.log("In-memory persistence set successfully");
   })
   .catch((error) => {
     console.error("Error setting in-memory persistence: ", error);
   });
+
+// Check authentication state and fetch data
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    console.log("User is signed in:", user);
+    // User is signed in, you can proceed with Firestore operations
+    fetchData();
+  } else {
+    console.log("No user is signed in");
+    // Handle the case where no user is signed in
+  }
+});
+
+// Firestore operations
+async function fetchData() {
+  try {
+    const querySnapshot = await getDocs(collection(firestore, "yourCollection"));
+    querySnapshot.forEach((doc) => {
+      console.log(`${doc.id} => ${doc.data()}`);
+    });
+  } catch (error) {
+    console.error("Error fetching documents: ", error);
+  }
+}
 
 export { app, auth, firestore, storage };
