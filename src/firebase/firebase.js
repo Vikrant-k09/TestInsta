@@ -4,7 +4,7 @@ import { getAuth, inMemoryPersistence } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
-// Your web app's Firebase configuration
+// Your web app's Firebase configuration using environment variables for security
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -15,10 +15,21 @@ const firebaseConfig = {
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
-// Initialize Firebase
+// Initialize Firebase app
 const app = initializeApp(firebaseConfig);
+
+// Initialize Firebase services
 const auth = getAuth(app);
 const firestore = getFirestore(app);
 const storage = getStorage(app);
+
+// Set Auth persistence to in-memory for better control in certain environments
+auth.setPersistence(inMemoryPersistence)
+  .then(() => {
+    // In-memory persistence set successfully
+  })
+  .catch((error) => {
+    console.error("Error setting in-memory persistence: ", error);
+  });
 
 export { app, auth, firestore, storage };
